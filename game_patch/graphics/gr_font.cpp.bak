@@ -245,19 +245,7 @@ GrNewFont::GrNewFont(std::string_view name) :
     baseline_y_ = face->size->metrics.ascender / 64;
     xlog::trace("line_spacing %d height %d baseline_y %d", line_spacing_, height_, baseline_y_);
 
-    // Prepare lookup table for translating Windows 1251 characters (encoding used by RF) into Unicode codepoints
-
-    static std::pair<int, int> win_1251_char_ranges[]{
-        {0x20, 0x7E},
-        {0x99, 0x99},
-        {0x9C, 0x9C},
-        {0x9F, 0x9F},
-        {0xA6, 0xA7},
-        {0xAA, 0xAB},
-        {0xAE, 0xAE},
-        {0xB0, 0xB0},
-        {0xC0, 0xFF},
-    };
+    // Prepare lookup table for translating Windows 1252 characters (encoding used by RF) into Unicode codepoints
 
     static std::pair<int, int> win_1252_char_ranges[]{
         {0x20, 0x7E},
@@ -286,16 +274,16 @@ GrNewFont::GrNewFont(std::string_view name) :
     // Prepare character mapping and array of unicode code points
     std::fill(char_map_, char_map_ + std::size(char_map_), -1);
     std::vector<int> unicode_code_points;
-    for (auto& range : win_1251_char_ranges) {
+    for (auto& range : win_1252_char_ranges) {
         for (auto c = range.first; c < range.second + 1; ++c) {
             if (digits_only && !std::isdigit(c)) {
                 continue;
             }
-            char windows_1251_char = static_cast<char>(c);
+            char windows_1252_char = static_cast<char>(c);
             wchar_t unicode_char = 0;
-            MultiByteToWideChar(1251, 0, &windows_1251_char, 1, &unicode_char, 1);
+            MultiByteToWideChar(1252, 0, &windows_1252_char, 1, &unicode_char, 1);
             unicode_code_points.push_back(unicode_char);
-            auto char_idx = static_cast<unsigned char>(windows_1251_char);
+            auto char_idx = static_cast<unsigned char>(windows_1252_char);
             char_map_[char_idx] = unicode_code_points.size() - 1;
         }
     }
